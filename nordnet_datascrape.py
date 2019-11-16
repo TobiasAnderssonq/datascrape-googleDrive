@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import googleDriveService as googleDrive
 
-dataGlobal = []
+dataGlobal = [] 
 data = []
 keys = []
 
@@ -25,8 +25,8 @@ def extractDataByTableElements(listOfTableElements):
         if isinstance(element, list):
             extractDataByTableElements(element)
         else:
-            dataGlobal.append(element)
-    return dataGlobal
+            dataGlobal.append(element) 
+    return dataGlobal 
 
 def filterData():
     filtered_data_list = []
@@ -42,4 +42,5 @@ dataGlobal = []
 filtered_keys = extractDataByTableElements(keys)
 
 Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys)
-googleDrive.saveResultToGoogleDrive(Nordnet_df, 'nordnetStockData')
+googleDrive.saveResultToGoogleDrive(Nordnet_df, 'nordnetStockData.txt')
+googleDrive.downloadFromGoogleDrive('nordnetStockData.txt')

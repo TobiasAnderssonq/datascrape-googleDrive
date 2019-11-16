@@ -7,14 +7,32 @@ drive = GoogleDrive(gauth)
 
 def saveResultToGoogleDrive(dataToUpload, filename):
     deleteFileIfPresent(filename)
-    dataFile = drive.CreateFile({'title': filename + '.txt'})
+    dataFile = drive.CreateFile({'title': filename})
     dataToUpload.to_csv('output.csv', encoding = 'utf-8')
     dataFile.SetContentFile('output.csv')
     dataFile.Upload()
 
-def deleteFileIfPresent(filename):
+def checkFileIfPresent(filename):
     file_list = drive.ListFile().GetList()
     for file1 in file_list:
-        if file1['title'] == filename + '.txt':
-            file1 = drive.CreateFile({'id': file1['id']})
-            file1.Delete()
+        if file1["title"] == filename: #Förutsätter att man ger extension också
+            return file1['id']
+        else:
+            continue
+    return None
+
+
+def deleteFileIfPresent(filename):
+    file_id = checkFileIfPresent(filename)
+    if file_id:
+        file1 = drive.CreateFile({'id': file_id})
+        file1.Delete()
+
+def downloadFromGoogleDrive(filename):
+    file_id = checkFileIfPresent(filename)
+    if file_id:
+        file1 = drive.CreateFile({'id': file_id})
+        file1.GetContentFile(file1["title"])
+
+
+
