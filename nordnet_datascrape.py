@@ -37,13 +37,13 @@ def filterData():
         del filtered_data[0:11]
     return filtered_data_list
 
-def writeFile(filename, dataToWrite): #Det är något som inte fungerar med savetogoogledrive
+def writeFile(filename, dataToWrite):
     if os.path.isfile(filename):
         csv_df = pd.read_csv(filename)
-        export_csv = csv_df.join(dataToWrite) #denna verkar inte heller fungera som den ska. Men tror den är enkel att lösa
+        export_csv = csv_df.join(dataToWrite) 
     else:
-        export_csv  = dataToWrite.to_csv(filename)  
-    googleDrive.saveResultToGoogleDrive(export_csv, outputFileName)
+        export_csv  = dataToWrite.to_csv(filename, encoding='utf-8')  
+    googleDrive.saveResultToGoogleDrive(outputFileName)
 
 
 getNordnetData()
@@ -53,5 +53,3 @@ filtered_keys = extractDataByTableElements(keys)
 
 Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys)
 writeFile(outputFileName, Nordnet_df)
-
-#googleDrive.downloadFromGoogleDrive(outputFileName)    Gör ingenting. Spar för att komma ihåg

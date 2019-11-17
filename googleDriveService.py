@@ -5,17 +5,17 @@ from pydrive.auth import GoogleAuth
 gauth = GoogleAuth()
 drive = GoogleDrive(gauth)
 
-def saveResultToGoogleDrive(dataToUpload, filename):
+def saveResultToGoogleDrive(filename):
     deleteFileIfPresent(filename)
     dataFile = drive.CreateFile({'title': filename})
     #dataToUpload.to_csv('output.csv', encoding = 'utf-8') test
-    dataFile.SetContentFile(dataToUpload)
+    dataFile.SetContentFile(filename)
     dataFile.Upload()
 
 def checkFileIfPresent(filename):
     file_list = drive.ListFile().GetList()
     for file1 in file_list:
-        if file1["title"] == filename: #Förutsätter att man ger extension också
+        if file1["title"] == filename:
             return file1['id']
         else:
             continue
