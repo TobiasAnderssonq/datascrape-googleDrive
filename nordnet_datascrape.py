@@ -1,12 +1,13 @@
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-import re
 import googleDriveService as googleDrive
+import os
 
 dataGlobal = [] 
 data = []
 keys = []
+outputFileName = "nordnetStockData.csv"
 
 def getNordnetData():
     global data
@@ -36,11 +37,21 @@ def filterData():
         del filtered_data[0:11]
     return filtered_data_list
 
+def writeFile(filename, dataToWrite): #Det är något som inte fungerar med savetogoogledrive
+    if os.path.isfile(filename):
+        csv_df = pd.read_csv(filename)
+        export_csv = csv_df.join(dataToWrite) #denna verkar inte heller fungera som den ska. Men tror den är enkel att lösa
+    else:
+        export_csv  = dataToWrite.to_csv(filename)  
+    googleDrive.saveResultToGoogleDrive(export_csv, outputFileName)
+
+
 getNordnetData()
 filtered_data = filterData()
 dataGlobal = []
 filtered_keys = extractDataByTableElements(keys)
 
 Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys)
-googleDrive.saveResultToGoogleDrive(Nordnet_df, 'nordnetStockData.txt')
-googleDrive.downloadFromGoogleDrive('nordnetStockData.txt')
+writeFile(outputFileName, Nordnet_df)
+
+#googleDrive.downloadFromGoogleDrive(outputFileName)    Gör ingenting. Spar för att komma ihåg
