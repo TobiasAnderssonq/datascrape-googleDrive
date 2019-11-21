@@ -38,7 +38,6 @@ def filterData():
         del filtered_data[0:11]
     return filtered_data_list
 
-<<<<<<< HEAD
 def cleanData(dirty_df, dirty_column, dirt):
     clean_df = dirty_df
     clean_df[dirty_column] = dirty_df[dirty_column].replace(dirt, "", regex=True)
@@ -58,16 +57,6 @@ def updateFile(filename, dataToWrite):
     else:
         export_csv  = dataToWrite.to_csv(filename)  
     googleDrive.saveResultToGoogleDrive(filename)
-=======
-def writeFile(filename, dataToWrite):
-    if os.path.isfile(filename):
-        csv_df = pd.read_csv(filename)
-        export_csv = csv_df.join(dataToWrite) 
-    else:
-        export_csv  = dataToWrite.to_csv(filename, encoding='utf-8')  
-    googleDrive.saveResultToGoogleDrive(outputFileName)
-
->>>>>>> 022471edf29de84d1e6ba1199a91ef04665b06ff
 
 getNordnetData()
 filtered_data = filterData()
@@ -75,11 +64,7 @@ dataGlobal = []
 filtered_keys = extractDataByTableElements(keys)
 
 Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys)
-<<<<<<< HEAD
 Nordnet_df = cleanData(Nordnet_df, "%", "[\%]")
 Nordnet_df = numData(Nordnet_df, filtered_keys[2:10])
 Nordnet_df["Date"] = datetime.date()
 updateFile(outputFileName, Nordnet_df)
-=======
-writeFile(outputFileName, Nordnet_df)
->>>>>>> 022471edf29de84d1e6ba1199a91ef04665b06ff
