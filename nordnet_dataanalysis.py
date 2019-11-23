@@ -3,8 +3,15 @@ import googleDriveService as googleDrive
 from matplotlib import pyplot as plt
 import os
 
-def getData(filename): #fortsätt här
+def getData(filename):
     if os.path.isfile(filename):
+        df = pd.read_csv(filename)
+    elif googleDrive.checkFileIfPresent != None:
+        googleDrive.downloadFromGoogleDrive(filename)
+        df = pd.read_csv(filename)
+    else:
+        print("File not found")
+    return df
 
 def line_chart(df, column_x, column_y, sortbyColumn=None, sortbyValue=None):
     if sortbyColumn == None:
@@ -14,4 +21,5 @@ def line_chart(df, column_x, column_y, sortbyColumn=None, sortbyValue=None):
         plt.plot(sorted_df.column_x, df.column_y)
     plt.show()
 
-line_chart() #för att kunna lägga in df till denna
+nordnet_df = getData("nordnetStockData.csv")
+line_chart(nordnet_df, )#VAD DET NU BLIR HÄR
