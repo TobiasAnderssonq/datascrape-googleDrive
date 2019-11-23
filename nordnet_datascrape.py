@@ -16,18 +16,31 @@ def getNordnetData():
     nordnet_response = requests.get("https://www.nordnet.se/mux/web/marknaden/kurslista/aktier.html?marknad=Sverige&lista=1_1&large=on&sektor=0&subtyp=price&sortera=&sorteringsordning=")
     nordnet_data = nordnet_response.content
     nordSoup = BeautifulSoup(nordnet_data, "html.parser")
-    table = nordSoup.find("table", id = "kurstabell")
-    rows = table.findAll('tr')
-    columns = table.findAll('thead')
-    data = [[td.findChildren(text=True) for td in tr.findAll("td")] for tr in rows]
+    table = nordSoup.find("table")
+    columns = nordSoup.find('table').findAll('thead')
     keys = [[th.findChildren(text=True) for th in tr.findAll("th")] for tr in columns]
+
+    for row in table.tbody.findAll('tr'):
+        dataRow = [
+                row.findAll('td')[3].text.strip(),
+                row.findAll('td')[5].text.strip(),
+                row.findAll('td')[6].text.strip(),
+                row.findAll('td')[7].text.strip(),
+                row.findAll('td')[8].text.strip(),
+                row.findAll('td')[9].text.strip(),
+                row.findAll('td')[11].text.strip(),
+                row.findAll('td')[12].text.strip(),
+                row.findAll('td')[13].text.strip(),
+                row.findAll('td')[14].text.strip()
+        ]
+    data.append(dataRow)
 
 def extractDataByTableElements(listOfTableElements):
     for element in listOfTableElements: 
         if isinstance(element, list):
             extractDataByTableElements(element)
         else:
-            dataGlobal.append(element) 
+            dataGlobal.append(element)       
     return dataGlobal 
 
 def filterData():
@@ -51,20 +64,21 @@ def numData(nonFloatDF, columnsToFloat):
 
 def updateFile(filename, dataToWrite):
     if os.path.isfile(filename):
-        csv_df = pd.read_csv(filename)
+         """ csv_df = pd.read_csv(filename)
         export_data = pd.concat([csv_df, dataToWrite])
-        export_csv = export_data.to_csv(filename)
+        export_data.to_csv(filename) """
     else:
-        export_csv  = dataToWrite.to_csv(filename)  
+        dataToWrite.to_csv(filename, encoding = 'utf-8')  
     googleDrive.saveResultToGoogleDrive(filename)
 
 getNordnetData()
-filtered_data = filterData()
+filtered_keys = extractDataByTableElements(keys)[1:]
 dataGlobal = []
-filtered_keys = extractDataByTableElements(keys)
-
-Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys)
-Nordnet_df = cleanData(Nordnet_df, "%", "[\%]")
+#filtered_data = filterData()
+Nordnet_df = pd.DataFrame(data, columns = filtered_keys)
+updateFile(outputFileName, Nordnet_df)
+""" Nordnet_df = cleanData(Nordnet_df, "%", "[\%]")
 Nordnet_df = numData(Nordnet_df, filtered_keys[2:10])
 Nordnet_df["Date"] = datetime.date()
-updateFile(outputFileName, Nordnet_df)
+
+ """

@@ -8,10 +8,6 @@ drive = GoogleDrive(gauth)
 def saveResultToGoogleDrive(filename):
     deleteFileIfPresent(filename)
     dataFile = drive.CreateFile({'title': filename})
-<<<<<<< HEAD
-=======
-    #dataToUpload.to_csv('output.csv', encoding = 'utf-8') test
->>>>>>> 022471edf29de84d1e6ba1199a91ef04665b06ff
     dataFile.SetContentFile(filename)
     dataFile.Upload()
 
@@ -36,6 +32,3 @@ def downloadFromGoogleDrive(filename):
     if file_id:
         file1 = drive.CreateFile({'id': file_id})
         file1.GetContentFile(file1["title"])
-
-
-
