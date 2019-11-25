@@ -32,6 +32,3 @@ def downloadFromGoogleDrive(filename):
     if file_id:
         file1 = drive.CreateFile({'id': file_id})
         file1.GetContentFile(file1["title"])
-
-
-
