@@ -21,21 +21,23 @@ def getNordnetData():
     table = nordSoup.find("table")
     columns = nordSoup.find('table').findAll('thead')
     keys = [[th.findChildren(text=True) for th in tr.findAll("th")] for tr in columns]
-    for row in table.tbody.findAll('tr'):
+    data = [item.get_text(strip=True) for item in nordSoup.select("span.c02473")]
+    """for row in table.tbody.findAll('tr'): #[item.get_text(strip=True) for item in soup.select("span.header_text")]
+        dataRow = [item.get_text(strip=True) for item in nordSoup.select("span.c02473")]
         dataRow = [
-                row.findAll('td')[3].text.strip(),
-                row.findAll('td')[5].text.strip(),
-                row.findAll('td')[6].text.strip(),
-                row.findAll('td')[7].text.strip(),
-                row.findAll('td')[8].text.strip(),
-                row.findAll('td')[9].text.strip(),
-                row.findAll('td')[11].text.strip(),
-                row.findAll('td')[12].text.strip(),
-                row.findAll('td')[13].text.strip(),
-                row.findAll('td')[14].text.strip()
+                row.findAll(attrs={"class":'c02473'})[3].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[5].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[6].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[7].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[8].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[9].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[11].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[12].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[13].text.strip(),
+                row.findAll(attrs={"class":'c02473'})[14].text.strip()
         ]
         dataRow = [row.encode('utf-8') for row in dataRow]
-        data.append(dataRow)
+        data.append(dataRow)"""
 
 def extractDataByTableElements(listOfTableElements):
     for element in listOfTableElements: 
@@ -49,8 +51,8 @@ def filterData():
     filtered_data_list = []
     filtered_data = list(filter(lambda a: a != " ", (filter(lambda a: a != "\n", extractDataByTableElements(data)))))
     while filtered_data:
-        filtered_data_list.append(filtered_data[0:11])
-        del filtered_data[0:11]
+        filtered_data_list.append(filtered_data[0:10])
+        del filtered_data[0:10]
     return filtered_data_list
 
 def cleanData(dirty_df, dirty_column, dirt):
@@ -71,20 +73,24 @@ def updateFile(filename, dataToWrite):
         export_data.to_csv(filename) """
     else:
         dataToWrite.to_csv(filename, encoding = 'utf-8')  
-    googleDrive.saveResultToGoogleDrive(filename)
+    #googleDrive.saveResultToGoogleDrive(filename)
 
 
 def runDatascrape():
     global dataGlobal
     getNordnetData()
     filtered_keys = extractDataByTableElements(keys)[1:]
+    #print(filtered_keys)
     dataGlobal = []
-    #filtered_data = filterData()
-    Nordnet_df = pd.DataFrame(data, columns = filtered_keys)
-    return Nordnet_df
+    filtered_data = filterData()
+    Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys)
     #updateFile(outputFileName, Nordnet_df)
+    return Nordnet_df
+    
 """ Nordnet_df = cleanData(Nordnet_df, "%", "[\%]")
 Nordnet_df = numData(Nordnet_df, filtered_keys[2:10])
 Nordnet_df["Date"] = datetime.date()
 
  """
+print(runDatascrape())
+#runDatascrape()
