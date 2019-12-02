@@ -1,2 +1,4 @@
 __pycache__/googleDriveService.cpython-37.pyc
 nordnetStockData.csv
+*.pyc
+client_secrets.json

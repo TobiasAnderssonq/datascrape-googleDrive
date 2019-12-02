@@ -25,9 +25,6 @@ class datascrapeTable(Frame):
         self.table = pt = Table(self.lower_frame, dataframe=df, showtoolbar=True, showstatusbar=True)
         pt.show()
 
-        #self.upper_frame.pack()
-        #self.lower_frame.pack()
-
     def handleButtonClick(self):
             df = datascrape.runDatascrape()
             self.table.model.df = df

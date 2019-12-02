@@ -6,8 +6,9 @@ except ImportError:
      from urlparse import urlparse
 
 class PyCrawler(object):
-    def __init__(self):     
-        self.visited = set()    
+    def __init__(self, parent):     
+        self.visited = set()
+        self.parent = parent    
 
     def get_html(self, url):    
         try:    
@@ -36,9 +37,9 @@ class PyCrawler(object):
     def crawl(self, url):                   
         for link in self.get_links(url):    
             if link in self.visited:        
-                continue                    
-            print(link)                 
-            self.visited.add(link)            
+                continue                                   
+            self.visited.add(link)
+            self.parent.update_visited(link)            
             info = self.extract_info(link)    
             self.crawl(link)                  
 
