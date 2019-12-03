@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import googleDriveService as googleDrive
 import os
-from datetime import datetime
+from datetime import date
 from more_itertools import unique_everseen
 
 dataGlobal = [] 
@@ -88,18 +88,17 @@ def runDatascrape():
     filtered_data = filterData()
     Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys[1:9])
     Nordnet_df[filtered_keys[0]] = namn
-    dated = datetime.date
-    #Nordnet_df["Date"] = dated.strftime("%y%m%D")
+    today = date.today()
+    today_text = today.strftime("%y%m%d")
+    Nordnet_df["Date"] = today_text
     #Nordnet_df = cleanData(Nordnet_df, "'b")
     #Nordnet_df = cleanData(Nordnet_df, "%", 'Idag %')
     #Nordnet_df = cleanData(Nordnet_df, "MSEK", replace=True, replace_value="000000")
     updateFile(outputFileName, Nordnet_df)
     return Nordnet_df
     
-""" Nordnet_df = cleanData(Nordnet_df, "%", "[\%]")
+""" 
 Nordnet_df = numData(Nordnet_df, filtered_keys[2:10])
-Nordnet_df["Date"] = datetime.date()
-
  """
 #print(runDatascrape())
 runDatascrape()
