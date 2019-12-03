@@ -3,41 +3,31 @@ import requests
 from bs4 import BeautifulSoup
 import googleDriveService as googleDrive
 import os
-import datetime
+from datetime import datetime
+from more_itertools import unique_everseen
 
 dataGlobal = [] 
 data = []
+namn = []
 keys = []
 outputFileName = "nordnetStockData.csv"
 
 def getNordnetData():
     global data
     global keys
+    global namn
     data = []
     keys = []
-    nordnet_response = requests.get("https://www.nordnet.se/mux/web/marknaden/kurslista/aktier.html?marknad=Sverige&lista=1_1&large=on&sektor=0&subtyp=price&sortera=&sorteringsordning=")
+    namn = []
+    nordnet_response = requests.get("https://www.nordnet.se/marknaden/aktiekurser?exchangeCountry=SE&exchangeList=se%3Aomxs30")
     nordnet_data = nordnet_response.content
-    nordSoup = BeautifulSoup(nordnet_data, "html.parser")
+    nordSoup = BeautifulSoup(nordnet_data, "html5lib") #"html.parser"
     table = nordSoup.find("table")
     columns = nordSoup.find('table').findAll('thead')
     keys = [[th.findChildren(text=True) for th in tr.findAll("th")] for tr in columns]
-    data = [item.get_text(strip=True) for item in nordSoup.select("span.c02473")]
-    """for row in table.tbody.findAll('tr'): #[item.get_text(strip=True) for item in soup.select("span.header_text")]
-        dataRow = [item.get_text(strip=True) for item in nordSoup.select("span.c02473")]
-        dataRow = [
-                row.findAll(attrs={"class":'c02473'})[3].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[5].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[6].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[7].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[8].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[9].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[11].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[12].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[13].text.strip(),
-                row.findAll(attrs={"class":'c02473'})[14].text.strip()
-        ]
-        dataRow = [row.encode('utf-8') for row in dataRow]
-        data.append(dataRow)"""
+    data = [item.get_text(strip=True).encode("utf-8") for item in nordSoup.select("span.c02474")]
+    namn = [item.get_text(strip=True).encode("utf-8") for item in table.select("a.c02447")] #strip("'b")
+    namn = list(unique_everseen(namn))
 
 def extractDataByTableElements(listOfTableElements):
     for element in listOfTableElements: 
@@ -51,13 +41,27 @@ def filterData():
     filtered_data_list = []
     filtered_data = list(filter(lambda a: a != " ", (filter(lambda a: a != "\n", extractDataByTableElements(data)))))
     while filtered_data:
-        filtered_data_list.append(filtered_data[0:10])
-        del filtered_data[0:10]
+        temp_list = []
+        temp_list.extend(filtered_data[:5])
+        temp_list.extend(filtered_data[7:10])
+        filtered_data_list.append(temp_list)
+        del filtered_data[:10]
     return filtered_data_list
 
-def cleanData(dirty_df, dirty_column, dirt):
+def cleanData(dirty_df, dirt, dirty_column=False, replace_value = False, replace=False):
     clean_df = dirty_df
-    clean_df[dirty_column] = dirty_df[dirty_column].replace(dirt, "", regex=True)
+    if replace == False:
+        if dirty_column == False:
+            clean_df = dirty_df.replace(to_replace=dirt, value="", regex=True)
+        else:
+            clean_df[dirty_column] = dirty_df[dirty_column].replace(to_replace=dirt, value="", regex=True)
+    elif replace == True and replace_value == False:
+        print("Need replace value")
+    else:
+        if dirty_column == False:
+            clean_df = dirty_df.replace(to_replace=dirt, value=replace_value, regex=True)
+        else:
+            clean_df[dirty_column] = dirty_df[dirty_column].replace(to_replace=dirt, value=replace_value, regex=True)
     return clean_df
 
 def numData(nonFloatDF, columnsToFloat):
@@ -79,12 +83,17 @@ def updateFile(filename, dataToWrite):
 def runDatascrape():
     global dataGlobal
     getNordnetData()
-    filtered_keys = extractDataByTableElements(keys)[1:]
-    #print(filtered_keys)
+    filtered_keys = extractDataByTableElements(keys)[1:] #SE VAD SOM BLIR RÄTT ANTAL HÄR
     dataGlobal = []
     filtered_data = filterData()
-    Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys)
-    #updateFile(outputFileName, Nordnet_df)
+    Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys[1:9])
+    Nordnet_df[filtered_keys[0]] = namn
+    dated = datetime.date
+    #Nordnet_df["Date"] = dated.strftime("%y%m%D")
+    #Nordnet_df = cleanData(Nordnet_df, "'b")
+    #Nordnet_df = cleanData(Nordnet_df, "%", 'Idag %')
+    #Nordnet_df = cleanData(Nordnet_df, "MSEK", replace=True, replace_value="000000")
+    updateFile(outputFileName, Nordnet_df)
     return Nordnet_df
     
 """ Nordnet_df = cleanData(Nordnet_df, "%", "[\%]")
@@ -92,5 +101,5 @@ Nordnet_df = numData(Nordnet_df, filtered_keys[2:10])
 Nordnet_df["Date"] = datetime.date()
 
  """
-print(runDatascrape())
-#runDatascrape()
+#print(runDatascrape())
+runDatascrape()
