@@ -25,8 +25,8 @@ def getNordnetData():
     table = nordSoup.find("table")
     columns = nordSoup.find('table').findAll('thead')
     keys = [[th.findChildren(text=True) for th in tr.findAll("th")] for tr in columns]
-    data = [item.get_text(strip=True).encode("utf-8") for item in nordSoup.select("span.c02474")]
-    namn = [item.get_text(strip=True).encode("utf-8") for item in table.select("a.c02447")] #strip("'b")
+    data = [item.get_text(strip=True) for item in nordSoup.select("span.c02474")]
+    namn = [item.get_text(strip=True) for item in table.select("a.c02447")] #strip("'b")
     namn = list(unique_everseen(namn))
 
 def extractDataByTableElements(listOfTableElements):
@@ -52,22 +52,22 @@ def cleanData(dirty_df, dirt, dirty_column=False, replace_value = False, replace
     clean_df = dirty_df
     if replace == False:
         if dirty_column == False:
-            clean_df = dirty_df.replace(to_replace=dirt, value="", regex=True)
+            clean_df = clean_df.replace(to_replace=dirt, value="", regex=True)
         else:
-            clean_df[dirty_column] = dirty_df[dirty_column].replace(to_replace=dirt, value="", regex=True)
+            clean_df[dirty_column] = clean_df[dirty_column].replace(to_replace=dirt, value="", regex=True)
     elif replace == True and replace_value == False:
         print("Need replace value")
     else:
         if dirty_column == False:
-            clean_df = dirty_df.replace(to_replace=dirt, value=replace_value, regex=True)
+            clean_df = clean_df.replace(to_replace=dirt, value=replace_value, regex=True)
         else:
-            clean_df[dirty_column] = dirty_df[dirty_column].replace(to_replace=dirt, value=replace_value, regex=True)
+            clean_df[dirty_column] = clean_df[dirty_column].replace(to_replace=dirt, value=replace_value, regex=True)
     return clean_df
 
 def numData(nonFloatDF, columnsToFloat):
     FloatDF = nonFloatDF
     for column in columnsToFloat:
-        FloatDF.column = pd.to_numeric(FloatDF.column)
+        FloatDF[column] = pd.to_numeric(FloatDF[column])
     return FloatDF
 
 def updateFile(filename, dataToWrite):
@@ -83,22 +83,21 @@ def updateFile(filename, dataToWrite):
 def runDatascrape():
     global dataGlobal
     getNordnetData()
-    filtered_keys = extractDataByTableElements(keys)[1:] #SE VAD SOM BLIR RÄTT ANTAL HÄR
+    filtered_keys = extractDataByTableElements(keys)[1:]
     dataGlobal = []
     filtered_data = filterData()
     Nordnet_df = pd.DataFrame(filtered_data, columns = filtered_keys[1:9])
     Nordnet_df[filtered_keys[0]] = namn
     today = date.today()
-    today_text = today.strftime("%y%m%d")
+    today_text = int(today.strftime("%y%m%d"))
     Nordnet_df["Date"] = today_text
-    #Nordnet_df = cleanData(Nordnet_df, "'b")
-    #Nordnet_df = cleanData(Nordnet_df, "%", 'Idag %')
-    #Nordnet_df = cleanData(Nordnet_df, "MSEK", replace=True, replace_value="000000")
+    Nordnet_df = cleanData(Nordnet_df, "%", 'Idag %')
+    Nordnet_df = cleanData(Nordnet_df, "MSEK", replace=True, replace_value="000000")
+    Nordnet_df = cleanData(Nordnet_df, "SEK")
+    Nordnet_df = cleanData(Nordnet_df, "\+")
+    Nordnet_df = numData(Nordnet_df, filtered_keys[1:9])
+    print(Nordnet_df)
     updateFile(outputFileName, Nordnet_df)
     return Nordnet_df
-    
-""" 
-Nordnet_df = numData(Nordnet_df, filtered_keys[2:10])
- """
-#print(runDatascrape())
+
 runDatascrape()
