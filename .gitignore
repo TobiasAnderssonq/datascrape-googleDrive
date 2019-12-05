@@ -1,3 +1,4 @@
 nordnetStockData.csv
 *.pyc
 client_secrets.json
+quickstart.py

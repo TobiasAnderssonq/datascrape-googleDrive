@@ -71,13 +71,16 @@ def numData(nonFloatDF, columnsToFloat):
     return FloatDF
 
 def updateFile(filename, dataToWrite):
-    if os.path.isfile(filename):
-         """ csv_df = pd.read_csv(filename)
-        export_data = pd.concat([csv_df, dataToWrite])
-        export_data.to_csv(filename) """
+    if googleDrive.checkFileIfPresent(filename):
+        googleDrive.downloadFromGoogleDrive(filename)
+    #if os.path.isfile(filename):
+        csv_df = pd.read_csv(filename)
+        export_data = pd.concat([csv_df, dataToWrite], ignore_index=True, sort=False)
+        #csv_df.append(dataToWrite, ignore_index=True)
+        export_data.to_csv(path_or_buf=filename, index=False)
     else:
-        dataToWrite.to_csv(filename, encoding = 'utf-8')  
-    #googleDrive.saveResultToGoogleDrive(filename)
+        dataToWrite.to_csv(path_or_buf=filename, index=False)  
+    googleDrive.saveResultToGoogleDrive(filename)
 
 
 def runDatascrape():
@@ -96,7 +99,6 @@ def runDatascrape():
     Nordnet_df = cleanData(Nordnet_df, "SEK")
     Nordnet_df = cleanData(Nordnet_df, "\+")
     Nordnet_df = numData(Nordnet_df, filtered_keys[1:9])
-    print(Nordnet_df)
     updateFile(outputFileName, Nordnet_df)
     return Nordnet_df
 
