@@ -29,4 +29,4 @@ class datascrapeTable(Frame):
             df = datascrape.runDatascrape()
             self.table.model.df = df
             self.table.redraw()
-            print df    
+            print(df)

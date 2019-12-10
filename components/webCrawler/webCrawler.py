@@ -6,9 +6,9 @@ except ImportError:
      from urlparse import urlparse
 
 class PyCrawler(object):
-    def __init__(self, parent):     
+    def __init__(self):     
         self.visited = set()
-        self.parent = parent    
+        #self.parent = parent    
 
     def get_html(self, url):    
         try:    
@@ -39,9 +39,14 @@ class PyCrawler(object):
             if link in self.visited:        
                 continue                                   
             self.visited.add(link)
-            self.parent.update_visited(link)            
-            info = self.extract_info(link)    
+            #self.parent.update_visited(link)            
+            info = self.extract_info(link)   
+            print(link) 
             self.crawl(link)                  
 
     def start(self, starting_url):                     
         self.crawl(starting_url)
+
+if __name__ == '__main__':
+    pycrawler = PyCrawler()
+    pycrawler.start("https://en.wikipedia.org/wiki/Wikipedia:Random")

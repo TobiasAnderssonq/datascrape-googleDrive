@@ -29,8 +29,9 @@ class webCrawlerGui(Frame):
     def update_visited(self, newPage):
         self.visited.add(newPage)
         newEntry = Entry(self.visited_frame)
-        newEntry.place(relx=len(self.visited)/10)
+        newEntry.place(relx=len(self.visited)/10, width=30)
         newEntry.insert(0,newPage)
         newEntry.pack()
-        print self.visited
+        print(self.visited)
+
 
